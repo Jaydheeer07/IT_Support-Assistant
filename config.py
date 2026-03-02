@@ -21,10 +21,20 @@ BRAVE_SEARCH_API_KEY = os.getenv("BRAVE_SEARCH_API_KEY", "")
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "changeme")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "")
 
 PORT = int(os.getenv("PORT", "8000"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "info")
 ESCALATION_ATTEMPT_THRESHOLD = int(os.getenv("ESCALATION_ATTEMPT_THRESHOLD", "2"))
 KB_CONFIDENCE_THRESHOLD = float(os.getenv("KB_CONFIDENCE_THRESHOLD", "0.70"))
+RELOAD = os.getenv("RELOAD", "false").lower() == "true"
+
+# Startup guard — warn loudly if admin credentials are insecure
+if ADMIN_PASSWORD in ("", "changeme"):
+    import warnings
+    warnings.warn(
+        "ADMIN_PASSWORD is not set or is using the default 'changeme'. "
+        "Set ADMIN_USERNAME and ADMIN_PASSWORD in your .env file before deploying.",
+        stacklevel=1,
+    )
