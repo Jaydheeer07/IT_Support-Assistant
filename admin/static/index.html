@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A.T.L.A.S. Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+    nav { background: #0078d4; color: white; padding: 14px 28px; display: flex; gap: 24px; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    nav strong { font-size: 1.1rem; margin-right: 12px; }
+    nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-size: 0.95rem; padding: 4px 8px; border-radius: 4px; transition: background 0.2s; }
+    nav a:hover, nav a.active { background: rgba(255,255,255,0.2); color: white; }
+    .container { max-width: 960px; margin: 32px auto; padding: 0 20px; }
+    h1 { font-size: 1.6rem; margin-bottom: 24px; color: #0078d4; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px; }
+    .card { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .card .stat { font-size: 2.4rem; font-weight: 700; color: #0078d4; line-height: 1; }
+    .card .label { color: #666; font-size: 0.9rem; margin-top: 8px; }
+    .badge { display: inline-block; background: #ff4d4f; color: white; border-radius: 12px; padding: 2px 10px; font-size: 0.8rem; margin-left: 6px; }
+    #health { font-size: 0.85rem; color: #52c41a; margin-left: auto; }
+  </style>
+</head>
+<body>
+  <nav>
+    <strong>A.T.L.A.S. Admin</strong>
+    <a href="/admin/" class="active">Dashboard</a>
+    <a href="/admin/guides">KB Guides</a>
+    <a href="/admin/logs">Logs</a>
+    <a href="/admin/learning">Learning</a>
+    <span id="health">● Live</span>
+  </nav>
+  <div class="container">
+    <h1>Dashboard</h1>
+    <div class="grid" id="stats">
+      <div class="card"><div class="stat">—</div><div class="label">Loading...</div></div>
+    </div>
+  </div>
+  <script>
+    fetch('/admin/api/status').then(r => r.json()).then(data => {
+      document.getElementById('stats').innerHTML = `
+        <div class="card">
+          <div class="stat">${data.feedback_count}</div>
+          <div class="label">Total Feedback Entries</div>
+        </div>
+        <div class="card">
+          <div class="stat">${data.pending_proposals}${data.pending_proposals > 0 ? '<span class="badge">!</span>' : ''}</div>
+          <div class="label">Pending Learning Proposals</div>
+        </div>
+        <div class="card">
+          <div class="stat" style="color:#52c41a">✓</div>
+          <div class="label">A.T.L.A.S. ${data.version}</div>
+        </div>
+      `;
+    }).catch(() => {
+      document.getElementById('stats').innerHTML = '<div class="card"><div class="label" style="color:red">Failed to load status</div></div>';
+    });
+  </script>
+</body>
+</html>

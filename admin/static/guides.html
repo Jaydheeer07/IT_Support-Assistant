@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KB Guides — A.T.L.A.S. Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+    nav { background: #0078d4; color: white; padding: 14px 28px; display: flex; gap: 24px; align-items: center; }
+    nav strong { font-size: 1.1rem; margin-right: 12px; }
+    nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-size: 0.95rem; padding: 4px 8px; border-radius: 4px; }
+    nav a:hover, nav a.active { background: rgba(255,255,255,0.2); }
+    .container { max-width: 960px; margin: 32px auto; padding: 0 20px; }
+    h1 { font-size: 1.6rem; margin-bottom: 8px; color: #0078d4; }
+    .subtitle { color: #666; margin-bottom: 24px; font-size: 0.9rem; }
+    .card { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    button { background: #0078d4; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    button:hover { background: #006bb8; }
+    #result { margin-top: 16px; padding: 12px; border-radius: 6px; display: none; }
+    #result.success { background: #f6ffed; border: 1px solid #b7eb8f; color: #389e0d; }
+    #result.error { background: #fff2f0; border: 1px solid #ffa39e; color: #cf1322; }
+  </style>
+</head>
+<body>
+  <nav>
+    <strong>A.T.L.A.S. Admin</strong>
+    <a href="/admin/">Dashboard</a>
+    <a href="/admin/guides" class="active">KB Guides</a>
+    <a href="/admin/logs">Logs</a>
+    <a href="/admin/learning">Learning</a>
+  </nav>
+  <div class="container">
+    <h1>Knowledge Base Guides</h1>
+    <p class="subtitle">Add new Markdown guides to <code>knowledge_base/guides/</code> then reload the index.</p>
+    <div class="card">
+      <h3 style="margin-bottom:12px">Reload Knowledge Base Index</h3>
+      <p style="color:#666;font-size:0.9rem;margin-bottom:16px">After adding or editing Markdown files in <code>knowledge_base/guides/</code>, click below to re-index them into ChromaDB.</p>
+      <button onclick="reload()">Reload Guides</button>
+      <div id="result"></div>
+    </div>
+  </div>
+  <script>
+    function reload() {
+      const btn = document.querySelector('button');
+      btn.textContent = 'Reloading...';
+      btn.disabled = true;
+      fetch('/admin/api/guides/reload', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          const el = document.getElementById('result');
+          el.className = 'success';
+          el.textContent = `✓ ${data.guides_loaded} guides loaded successfully.`;
+          el.style.display = 'block';
+        })
+        .catch(() => {
+          const el = document.getElementById('result');
+          el.className = 'error';
+          el.textContent = 'Error reloading guides. Check server logs.';
+          el.style.display = 'block';
+        })
+        .finally(() => { btn.textContent = 'Reload Guides'; btn.disabled = false; });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning — A.T.L.A.S. Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+    nav { background: #0078d4; color: white; padding: 14px 28px; display: flex; gap: 24px; align-items: center; }
+    nav strong { font-size: 1.1rem; margin-right: 12px; }
+    nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-size: 0.95rem; padding: 4px 8px; border-radius: 4px; }
+    nav a:hover, nav a.active { background: rgba(255,255,255,0.2); }
+    .container { max-width: 960px; margin: 32px auto; padding: 0 20px; }
+    h1 { font-size: 1.6rem; margin-bottom: 8px; color: #0078d4; }
+    .subtitle { color: #666; margin-bottom: 24px; font-size: 0.9rem; }
+    .proposal { background: white; border-radius: 10px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 16px; }
+    .proposal h3 { font-size: 0.85rem; color: #999; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .heuristic { background: #f8f9ff; border-left: 4px solid #0078d4; padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 0.9rem; line-height: 1.5; margin-bottom: 16px; }
+    .actions { display: flex; gap: 12px; }
+    .btn-approve { background: #52c41a; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+    .btn-approve:hover { background: #389e0d; }
+    .btn-reject { background: white; color: #ff4d4f; border: 1px solid #ff4d4f; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+    .btn-reject:hover { background: #fff2f0; }
+    .empty { text-align: center; padding: 48px; color: #999; background: white; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  </style>
+</head>
+<body>
+  <nav>
+    <strong>A.T.L.A.S. Admin</strong>
+    <a href="/admin/">Dashboard</a>
+    <a href="/admin/guides">KB Guides</a>
+    <a href="/admin/logs">Logs</a>
+    <a href="/admin/learning" class="active">Learning</a>
+  </nav>
+  <div class="container">
+    <h1>Learning Proposals</h1>
+    <p class="subtitle">Review heuristics proposed by A.T.L.A.S. based on negative feedback patterns. Approved proposals are appended to <code>agent/memory.md</code>.</p>
+    <div id="proposals">Loading...</div>
+  </div>
+  <script>
+    function loadProposals() {
+      fetch('/admin/api/proposals').then(r => r.json()).then(data => {
+        const el = document.getElementById('proposals');
+        if (!data.length) { el.innerHTML = '<div class="empty">No pending proposals. A.T.L.A.S. is still learning!</div>'; return; }
+        el.innerHTML = data.map(p => `
+          <div class="proposal" id="p-${p.id}">
+            <h3>Proposal #${p.id} — ${p.created_at}</h3>
+            <div class="heuristic">${p.proposed_heuristic}</div>
+            <div class="actions">
+              <button class="btn-approve" onclick="decide(${p.id}, 'approve')">✓ Approve — Add to memory.md</button>
+              <button class="btn-reject" onclick="decide(${p.id}, 'reject')">✗ Reject</button>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+    function decide(id, action) {
+      fetch(`/admin/api/proposals/${id}/${action}`, { method: 'POST' }).then(() => {
+        const el = document.getElementById(`p-${id}`);
+        el.style.opacity = '0.4';
+        const msg = action === 'approve' ? '✓ Approved — added to memory.md' : '✗ Rejected';
+        const color = action === 'approve' ? '#52c41a' : '#ff4d4f';
+        el.innerHTML += `<p style="color:${color};margin-top:12px;font-weight:700">${msg}</p>`;
+        setTimeout(loadProposals, 1500);
+      });
+    }
+    loadProposals();
+  </script>
+</body>
+</html>

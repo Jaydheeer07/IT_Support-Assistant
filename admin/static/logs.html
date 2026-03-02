@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logs — A.T.L.A.S. Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+    nav { background: #0078d4; color: white; padding: 14px 28px; display: flex; gap: 24px; align-items: center; }
+    nav strong { font-size: 1.1rem; margin-right: 12px; }
+    nav a { color: rgba(255,255,255,0.9); text-decoration: none; font-size: 0.95rem; padding: 4px 8px; border-radius: 4px; }
+    nav a:hover, nav a.active { background: rgba(255,255,255,0.2); }
+    .container { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
+    h1 { font-size: 1.6rem; margin-bottom: 24px; color: #0078d4; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    th { background: #0078d4; color: white; padding: 12px 16px; text-align: left; font-size: 0.85rem; }
+    td { padding: 11px 16px; border-bottom: 1px solid #f0f0f0; font-size: 0.875rem; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    .rating-up { color: #52c41a; font-weight: 700; }
+    .rating-down { color: #ff4d4f; font-weight: 700; }
+    .empty { text-align: center; padding: 48px; color: #999; }
+  </style>
+</head>
+<body>
+  <nav>
+    <strong>A.T.L.A.S. Admin</strong>
+    <a href="/admin/">Dashboard</a>
+    <a href="/admin/guides">KB Guides</a>
+    <a href="/admin/logs" class="active">Logs</a>
+    <a href="/admin/learning">Learning</a>
+  </nav>
+  <div class="container">
+    <h1>Conversation Logs</h1>
+    <table id="logs-table">
+      <thead><tr><th>#</th><th>Session</th><th>User</th><th>Issue</th><th>Rating</th><th>Resolved</th><th>Date</th></tr></thead>
+      <tbody id="logs-body"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody>
+    </table>
+  </div>
+  <script>
+    fetch('/admin/api/logs').then(r => r.json()).then(data => {
+      const tbody = document.getElementById('logs-body');
+      if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty">No feedback logs yet.</td></tr>'; return; }
+      tbody.innerHTML = data.map((e, i) => `
+        <tr>
+          <td>${e.id}</td>
+          <td title="${e.session_id}">${e.session_id.substring(0, 12)}…</td>
+          <td>${e.user_id.substring(0, 12)}</td>
+          <td>${e.issue_summary || '—'}</td>
+          <td class="${e.rating === 1 ? 'rating-up' : 'rating-down'}">${e.rating === 1 ? '👍 +1' : '👎 -1'}</td>
+          <td>${e.resolved ? '✓' : '✗'}</td>
+          <td>${e.created_at}</td>
+        </tr>
+      `).join('');
+    });
+  </script>
+</body>
+</html>
