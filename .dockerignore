@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.git
+tests/
+requirements-dev.txt
+knowledge_base/chroma_db/
+learning/feedback.db
+docs/
