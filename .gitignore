@@ -13,3 +13,5 @@ build/
 !.env.example
 
 knowledge_base/chroma_db/
+
+learning/feedback.db
